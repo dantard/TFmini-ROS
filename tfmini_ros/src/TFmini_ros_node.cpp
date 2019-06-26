@@ -7,6 +7,7 @@ int main(int argc, char **argv)
   std::string id = "TFmini";
   std::string portName;
   int baud_rate;
+  double rate;
   benewake::TFmini *tfmini_obj;
   bool always = true;
   double min_range = 0.3, max_range = 12.0, fov = 0.04;
@@ -18,6 +19,7 @@ int main(int argc, char **argv)
   nh.param("min_range", min_range, 0.3);
   nh.param("max_range", max_range, 12.0);
   nh.param("fov", fov, 0.04);
+  nh.param("rate", rate, 10.0);
 
   tfmini_obj = new benewake::TFmini(portName, baud_rate);
   ros::Publisher pub_range = nh.advertise<sensor_msgs::Range>(id, 1000, true);
@@ -30,7 +32,7 @@ int main(int argc, char **argv)
   float dist = 0;
   ROS_INFO_STREAM("Start processing ...");
   
-
+  ros::Rate r(rate);
   while(ros::master::check() && ros::ok())
   {
     ros::spinOnce();
@@ -50,6 +52,7 @@ int main(int argc, char **argv)
       TFmini_range.header.stamp = ros::Time::now();
       pub_range.publish(TFmini_range);
     }
+    r.sleep();
   }
 
   tfmini_obj->closePort();
